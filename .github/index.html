@@ -1,0 +1,66 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>جم‌های Low-Cap تازه (زیر ۵۰k FDV)</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #eee; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #444; padding: 10px; text-align: center; }
+    th { background: #222; }
+    .update-time { color: #aaa; font-size: 0.9em; }
+    .positive { color: lime; }
+    .negative { color: red; }
+  </style>
+</head>
+<body>
+  <h1>لیست جم‌های Low-Cap تازه (FDV زیر ۵۰ هزار دلار، تازه لانچ‌شده)</h1>
+  <p class="update-time">آخرین آپدیت: <span id="time"></span> (هر ۴ ساعت)</p>
+  <p>فیلترها: FDV ۱k-۵۰k, حجم >۱k, لیکوئیدیتی >۵k, تغییر قیمت >۰%, نسبت خرید/فروش >۱.۱, عمر <۳ روز</p>
+
+  <table id="tokens-table">
+    <thead>
+      <tr>
+        <th>نام استخر</th>
+        <th>شبکه</th>
+        <th>FDV (USD)</th>
+        <th>لیکوئیدیتی (USD)</th>
+        <th>حجم ۲۴h (USD)</th>
+        <th>تغییر قیمت ۲۴h</th>
+        <th>نسبت خرید/فروش</th>
+        <th>عمر (روز)</th>
+        <th>لینک GeckoTerminal</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    fetch('data.json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('time').textContent = data.timestamp;
+        const tbody = document.querySelector('#tokens-table tbody');
+        tbody.innerHTML = '';
+        data.tokens.forEach(token => {
+          const row = document.createElement('tr');
+          const changeClass = token.price_change_h24 > 0 ? 'positive' : 'negative';
+          row.innerHTML = `
+            <td>${token.name}</td>
+            <td>${token.network.toUpperCase()}</td>
+            <td>\[ {token.fdv_usd.toLocaleString()}</td>
+            <td> \]{token.liquidity_usd.toLocaleString()}</td>
+            <td>$${token.volume_h24.toLocaleString()}</td>
+            <td class="\( {changeClass}"> \){token.price_change_h24.toFixed(2)}%</td>
+            <td>${token.buy_sell_ratio.toFixed(2)}</td>
+            <td>${token.age_days.toFixed(2)}</td>
+            <td><a href="${token.gecko_link}" target="_blank">مشاهده</a></td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(err => console.error('خطا در لود داده:', err));
+  </script>
+</body>
+</html>
