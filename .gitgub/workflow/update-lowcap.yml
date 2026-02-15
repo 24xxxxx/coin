@@ -1,0 +1,31 @@
+# .github/workflows/update-lowcap.yml
+name: Update Low-Cap Gems from GeckoTerminal
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'   # هر ۴ ساعت (برای تازه‌تر بودن داده‌ها)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch & Update Data
+        run: python update_lowcap.py
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add data.json index.html
+          git commit -m "Update low-cap gems list - $(date -u)" || echo "No changes"
+          git push
